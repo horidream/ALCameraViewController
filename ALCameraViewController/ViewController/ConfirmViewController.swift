@@ -50,7 +50,7 @@ public class ConfirmViewController: UIViewController, UIScrollViewDelegate {
     }
     
     public override func updateViewConstraints() {
-        self.widthConstrait.constant = self.cropOverlay.frame.width * (1 - croppingRatio)
+        self.widthConstrait.constant = self.cropOverlay.frame.width * (1 - 1/croppingRatio)
         super.updateViewConstraints()
         print("the width constrait is updated \(croppingRatio)")
     }

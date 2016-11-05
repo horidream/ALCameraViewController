@@ -454,7 +454,7 @@ extension CameraViewController {
             relatedBy: .equal,
             toItem: cameraOverlay,
             attribute: portrait ? .width : .height,
-            multiplier: cameraOverlay.ratio,
+            multiplier: 1/cameraOverlay.ratio,
             constant: 0)
         view.addConstraint(cameraOverlayWidthConstraint!)
     }
