@@ -28,6 +28,19 @@ internal class CropOverlay: UIView {
         createLines()
     }
     
+    var ratio:CGFloat = 1.0{
+        didSet{
+            print("did set ratio \(ratio)")
+            self.setNeedsLayout()
+        }
+    }
+    
+    
+    convenience internal init(ratio:CGFloat){
+        self.init()
+        self.ratio = ratio
+    }
+    
     internal override init(frame: CGRect) {
         super.init(frame: frame)
         createLines()
@@ -98,16 +111,17 @@ internal class CropOverlay: UIView {
         }
         
         let lineThickness = lineWidth / UIScreen.main.scale
-        let padding = (bounds.height - (lineThickness * CGFloat(horizontalLines.count))) / CGFloat(horizontalLines.count + 1)
-        
+        let paddingV = (bounds.height - (lineThickness * CGFloat(horizontalLines.count))) / CGFloat(horizontalLines.count + 1)
+        let paddingH = (bounds.width - (lineThickness * CGFloat(verticalLines.count))) / CGFloat(verticalLines.count + 1)
+
         for i in 0..<horizontalLines.count {
             let hLine = horizontalLines[i]
             let vLine = verticalLines[i]
             
-            let spacing = (padding * CGFloat(i + 1)) + (lineThickness * CGFloat(i))
-            
-            hLine.frame = CGRect(x: 0, y: spacing, width: bounds.width, height:  lineThickness)
-            vLine.frame = CGRect(x: spacing, y: 0, width: lineThickness, height: bounds.height)
+            let spacingV = (paddingV * CGFloat(i + 1)) + (lineThickness * CGFloat(i))
+            let spacingH = (paddingH * CGFloat(i + 1)) + (lineThickness * CGFloat(i))
+            hLine.frame = CGRect(x: 0, y: spacingV, width: bounds.width, height:  lineThickness)
+            vLine.frame = CGRect(x: spacingH, y: 0, width: lineThickness, height: bounds.height)
         }
         
     }

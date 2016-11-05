@@ -21,16 +21,21 @@ public class ConfirmViewController: UIViewController, UIScrollViewDelegate {
     var allowsCropping: Bool = false
     var verticalPadding: CGFloat = 30
     var horizontalPadding: CGFloat = 30
-    
+    var croppingRatio:CGFloat = 1.0
+    @IBOutlet weak var widthConstrait: NSLayoutConstraint!
     public var onComplete: CameraViewCompletion?
     
     var asset: PHAsset!
-    
-    public init(asset: PHAsset, allowsCropping: Bool) {
+    public init(asset: PHAsset, allowsCropping: Bool, croppingRatio:CGFloat = 1.0) {
         self.allowsCropping = allowsCropping
         self.asset = asset
+        self.croppingRatio = croppingRatio
         super.init(nibName: "ConfirmViewController", bundle: CameraGlobals.shared.bundle)
     }
+    
+    
+
+    
     
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -44,6 +49,12 @@ public class ConfirmViewController: UIViewController, UIScrollViewDelegate {
         return UIStatusBarAnimation.slide
     }
     
+    public override func updateViewConstraints() {
+        self.widthConstrait.constant = self.cropOverlay.frame.width * (1 - croppingRatio)
+        super.updateViewConstraints()
+        print("the width constrait is updated \(croppingRatio)")
+    }
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -54,7 +65,8 @@ public class ConfirmViewController: UIViewController, UIScrollViewDelegate {
         scrollView.maximumZoomScale = 1
         
         cropOverlay.isHidden = true
-        
+        cropOverlay.ratio = croppingRatio
+        self.cropOverlay.setNeedsUpdateConstraints()
         guard let asset = asset else {
             return
         }

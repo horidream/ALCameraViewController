@@ -13,7 +13,7 @@ import Photos
 public typealias CameraViewCompletion = (UIImage?, PHAsset?) -> Void
 
 public extension CameraViewController {
-    public class func imagePickerViewController(croppingEnabled: Bool, completion: @escaping CameraViewCompletion) -> UINavigationController {
+    public class func imagePickerViewController(croppingEnabled: Bool, croppingRatio:CGFloat = 1.0, completion: @escaping CameraViewCompletion) -> UINavigationController {
         let imagePicker = PhotoLibraryViewController()
         let navigationController = UINavigationController(rootViewController: imagePicker)
         
@@ -23,7 +23,7 @@ public extension CameraViewController {
 
         imagePicker.onSelectionComplete = { [weak imagePicker] asset in
             if let asset = asset {
-                let confirmController = ConfirmViewController(asset: asset, allowsCropping: croppingEnabled)
+                let confirmController = ConfirmViewController(asset: asset, allowsCropping: croppingEnabled, croppingRatio: croppingRatio)
                 confirmController.onComplete = { [weak imagePicker] image, asset in
                     if let image = image, let asset = asset {
                         completion(image, asset)
@@ -88,7 +88,7 @@ public class CameraViewController: UIViewController {
         return cameraView
     }()
     
-    let cameraOverlay : CropOverlay = {
+    var cameraOverlay : CropOverlay = {
         let cameraOverlay = CropOverlay()
         cameraOverlay.translatesAutoresizingMaskIntoConstraints = false
         return cameraOverlay
@@ -155,10 +155,18 @@ public class CameraViewController: UIViewController {
         return view
     }()
   
-    public init(croppingEnabled: Bool, allowsLibraryAccess: Bool = true, completion: @escaping CameraViewCompletion) {
+    var croppingRatio:CGFloat = 1.0{
+        didSet{
+            print("did set to \(croppingRatio)")
+        }
+    }
+    public init(croppingEnabled: Bool, croppingRatio:CGFloat = 1.0, allowsLibraryAccess: Bool = true, completion: @escaping CameraViewCompletion) {
         super.init(nibName: nil, bundle: nil)
         onCompletion = completion
         allowCropping = croppingEnabled
+        self.croppingRatio = croppingRatio
+        cameraOverlay.ratio = croppingRatio
+        print("init with ration: \(croppingRatio)")
         cameraOverlay.isHidden = !allowCropping
         libraryButton.isEnabled = allowsLibraryAccess
         libraryButton.isHidden = !allowsLibraryAccess
@@ -502,7 +510,7 @@ public class CameraViewController: UIViewController {
     }
     
     internal func showLibrary() {
-        let imagePicker = CameraViewController.imagePickerViewController(croppingEnabled: allowCropping) { image, asset in
+        let imagePicker = CameraViewController.imagePickerViewController(croppingEnabled: allowCropping, croppingRatio:  croppingRatio) { image, asset in
 
             defer {
                 self.dismiss(animated: true, completion: nil)
@@ -546,7 +554,7 @@ public class CameraViewController: UIViewController {
     }
     
     private func startConfirmController(asset: PHAsset) {
-        let confirmViewController = ConfirmViewController(asset: asset, allowsCropping: allowCropping)
+        let confirmViewController = ConfirmViewController(asset: asset, allowsCropping: allowCropping,croppingRatio: croppingRatio)
         confirmViewController.onComplete = { image, asset in
             if let image = image, let asset = asset {
                 self.onCompletion?(image, asset)
